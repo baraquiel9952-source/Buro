@@ -45,11 +45,14 @@ def api_reporte_pdf():
         if not data:
             return jsonify({'error': 'JSON requerido'}), 400
         
-        # Generar reporte
-        reporte = generar_reporte(data)
+        # Si viene un reporte completo, usarlo directamente
+        reporte = data.get('reporte')
+        if not reporte:
+            # Si no, generar uno nuevo
+            reporte = generar_reporte(data)
+        
         pdf_bytes = generar_pdf_reporte(reporte)
         
-        # Usar Response en lugar de send_file (más compatible con Vercel)
         return Response(
             pdf_bytes,
             mimetype='application/pdf',
@@ -60,6 +63,5 @@ def api_reporte_pdf():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Para desarrollo local
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
