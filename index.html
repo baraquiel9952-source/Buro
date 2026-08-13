@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Reporte Buró - Sintético</title>
+    <style>
+        :root {
+            --primary: #1a237e;
+            --accent: #ff6f00;
+            --success: #2e7d32;
+            --error: #c62828;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #e8eaf6, #f5f5f5);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 20px; }
+        label { display: block; font-weight: 600; font-size: 12px; margin: 12px 0 4px; }
+        input {
+            width: 100%; padding: 10px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 14px;
+        }
+        input:focus { outline: none; border-color: var(--primary); }
+        button {
+            width: 100%; padding: 12px; margin-top: 20px;
+            background: var(--primary); color: white; border: none;
+            border-radius: 8px; font-size: 15px; font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover { background: #283593; }
+        .alert {
+            padding: 12px; border-radius: 8px; margin-top: 15px;
+            display: none; font-size: 13px;
+        }
+        .alert-success { background: #e8f5e9; color: var(--success); display: block; }
+        .alert-error { background: #ffebee; color: var(--error); display: block; }
+        .disclaimer {
+            margin-top: 20px; padding: 12px; background: #fff3e0;
+            border-radius: 8px; font-size: 11px; color: #e65100; text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Reporte Buró Sintético</h1>
+        <p class="subtitle">Genera un reporte de crédito falso para testing</p>
+        
+        <label>Nombre completo:</label>
+        <input type="text" id="nombre" placeholder="Apellido1 Apellido2 Nombre">
+        
+        <label>RFC (opcional):</label>
+        <input type="text" id="rfc" placeholder="XXXX000000XXX" maxlength="13">
+        
+        <label>CURP (opcional):</label>
+        <input type="text" id="curp" placeholder="XXXX000000XXXXXXXX" maxlength="18">
+        
+        <button onclick="generar()">Generar Reporte</button>
+        
+        <div class="alert" id="alert"></div>
+        
+        <p class="disclaimer">⚠️ Documento sintético sin validez oficial. Solo para testing.</p>
+    </div>
+
+    <script>
+        async function generar() {
+            const nombre = document.getElementById('nombre').value.trim();
+            const rfc = document.getElementById('rfc').value.trim();
+            const curp = document.getElementById('curp').value.trim();
+            const alertEl = document.getElementById('alert');
+            
+            if (!nombre) {
+                alertEl.className = 'alert alert-error';
+                alertEl.textContent = 'Ingresa el nombre completo';
+                return;
+            }
+            
+            try {
+                const resp = await fetch('/api/reporte', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({nombre, rfc, curp, domicilio: {}})
+                });
+                const data = await resp.json();
+                if (data.exito) {
+                    alertEl.className = 'alert alert-success';
+                    alertEl.textContent = `✅ Reporte generado. Score: ${data.reporte.score.puntaje} (${data.reporte.score.interpretacion}). ${data.reporte.resumen.total_creditos} créditos.`;
+                } else {
+                    alertEl.className = 'alert alert-error';
+                    alertEl.textContent = '❌ ' + data.error;
+                }
+            } catch(e) {
+                alertEl.className = 'alert alert-error';
+                alertEl.textContent = '❌ Error: ' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>
