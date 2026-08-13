@@ -6,58 +6,50 @@
     <title>Generador de Reporte Buró - Sintético</title>
     <style>
         :root {
-            --primary: #1a237e;
-            --primary-light: #534bae;
-            --accent: #ff6f00;
-            --success: #2e7d32;
-            --error: #c62828;
+            --primary: #1a237e; --primary-light: #534bae; --accent: #ff6f00;
+            --success: #2e7d32; --error: #c62828;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #e8eaf6 0%, #f5f5f5 50%, #fff3e0 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            background: linear-gradient(135deg, #e8eaf6, #f5f5f5);
+            min-height: 100vh; padding: 20px;
         }
         .container {
-            background: white;
-            border-radius: 16px;
+            background: white; border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            padding: 30px;
-            max-width: 550px;
-            width: 100%;
+            padding: 30px; max-width: 650px; margin: 0 auto;
         }
-        h1 { text-align: center; color: var(--primary); margin-bottom: 5px; font-size: 22px; }
+        h1 { text-align: center; color: var(--primary); font-size: 22px; margin-bottom: 5px; }
         .subtitle { text-align: center; color: #666; font-size: 12px; margin-bottom: 20px; }
         
-        label { 
-            display: block; font-weight: 600; font-size: 11px; 
-            margin: 12px 0 5px; color: #333;
-            text-transform: uppercase; letter-spacing: 0.5px;
+        .section {
+            border: 2px solid #e8eaf6; border-radius: 10px;
+            padding: 15px; margin: 15px 0;
         }
-        input {
-            width: 100%; padding: 10px; border: 2px solid #e0e0e0;
-            border-radius: 8px; font-size: 14px; transition: all 0.3s;
-        }
-        input:focus { 
-            outline: none; border-color: var(--primary-light);
-            box-shadow: 0 0 0 4px rgba(26,35,126,0.08);
+        .section-title {
+            font-weight: 700; color: var(--primary); font-size: 13px;
+            margin-bottom: 12px; text-transform: uppercase;
         }
         
+        label { display: block; font-weight: 600; font-size: 11px; margin: 10px 0 4px; }
+        input, select {
+            width: 100%; padding: 10px; border: 2px solid #e0e0e0;
+            border-radius: 8px; font-size: 14px;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary-light); }
+        
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        
         .btn {
-            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            width: 100%; padding: 13px; border: none; border-radius: 8px;
             font-size: 14px; font-weight: 600; cursor: pointer;
-            transition: all 0.3s; font-family: inherit;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 12px;
+            margin-top: 12px; transition: all 0.3s;
         }
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
         .btn-pdf { background: var(--accent); color: white; }
-        .btn-pdf:hover:not(:disabled) { background: #ff8f00; }
+        .btn-json { background: #455a64; color: white; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         
         .btn .spinner {
@@ -72,22 +64,20 @@
 
         .alert {
             padding: 12px; border-radius: 8px; margin-top: 12px;
-            display: none; font-size: 13px; animation: fadeIn 0.3s;
+            display: none; font-size: 13px;
         }
-        .alert-success { background: #e8f5e9; color: var(--success); display: block; border: 1px solid #c8e6c9; }
-        .alert-error { background: #ffebee; color: var(--error); display: block; border: 1px solid #ffcdd2; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .alert-success { background: #e8f5e9; color: var(--success); display: block; }
+        .alert-error { background: #ffebee; color: var(--error); display: block; }
         
         .result-card {
             display: none; background: #fafafa; border-radius: 10px;
-            padding: 15px; margin-top: 15px; border: 2px solid #e8eaf6;
+            padding: 15px; margin-top: 15px;
         }
         .result-card.show { display: block; }
-        .result-title { font-weight: 700; color: var(--primary); font-size: 13px; margin-bottom: 10px; }
         .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
         .result-item { padding: 8px; background: white; border-radius: 6px; }
         .result-item .label { font-size: 9px; text-transform: uppercase; color: #888; }
-        .result-item .value { font-weight: 600; margin-top: 2px; }
+        .result-item .value { font-weight: 600; }
         
         .disclaimer {
             margin-top: 15px; padding: 10px; background: #fff3e0;
@@ -98,16 +88,89 @@
 <body>
     <div class="container">
         <h1>📊 Reporte Buró Sintético</h1>
-        <p class="subtitle">Genera un reporte de crédito falso para testing</p>
+        <p class="subtitle">Generador profesional de reportes de crédito para testing</p>
         
-        <label>Nombre completo:</label>
-        <input type="text" id="nombre" placeholder="Apellido1 Apellido2 Nombre">
+        <!-- SECCIÓN: DATOS PERSONALES -->
+        <div class="section">
+            <div class="section-title">👤 Datos Personales</div>
+            <label>Nombre completo: *</label>
+            <input type="text" id="nombre" placeholder="Apellido1 Apellido2 Nombre">
+            
+            <div class="row">
+                <div>
+                    <label>Fecha de nacimiento:</label>
+                    <input type="text" id="fechaNac" placeholder="DD/MM/AAAA">
+                </div>
+                <div>
+                    <label>RFC:</label>
+                    <input type="text" id="rfc" maxlength="13" placeholder="XXXX000000XXX">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div>
+                    <label>CURP:</label>
+                    <input type="text" id="curp" maxlength="18" placeholder="XXXX000000XXXXXXXX">
+                </div>
+                <div>
+                    <label>Empleo:</label>
+                    <select id="empleo">
+                        <option value="">Aleatorio</option>
+                        <option>Empleado</option>
+                        <option>Independiente</option>
+                        <option>Empresario</option>
+                        <option>Profesionista</option>
+                        <option>Comerciante</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         
-        <label>RFC (opcional):</label>
-        <input type="text" id="rfc" placeholder="XXXX000000XXX" maxlength="13">
-        
-        <label>CURP (opcional):</label>
-        <input type="text" id="curp" placeholder="XXXX000000XXXXXXXX" maxlength="18">
+        <!-- SECCIÓN: PERSONALIZACIÓN -->
+        <div class="section">
+            <div class="section-title">⚙️ Personalización (Opcional)</div>
+            <div class="row">
+                <div>
+                    <label>Número de créditos:</label>
+                    <input type="number" id="numCreditos" min="1" max="15" placeholder="Aleatorio (2-8)">
+                </div>
+                <div>
+                    <label>Rango de score:</label>
+                    <select id="rangoScore">
+                        <option value="">Aleatorio (400-850)</option>
+                        <option value="750-850">Excelente (750-850)</option>
+                        <option value="680-749">Bueno (680-749)</option>
+                        <option value="600-679">Regular (600-679)</option>
+                        <option value="400-599">Malo (400-599)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div>
+                    <label>Institución específica:</label>
+                    <select id="institucion">
+                        <option value="">Aleatoria</option>
+                        <option>BBVA México</option>
+                        <option>Banorte</option>
+                        <option>Santander</option>
+                        <option>HSBC</option>
+                        <option>Nu México</option>
+                        <option>Stori</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Tipo de crédito:</label>
+                    <select id="tipoCredito">
+                        <option value="">Aleatorio</option>
+                        <option>Tarjeta de Crédito</option>
+                        <option>Préstamo Personal</option>
+                        <option>Crédito Hipotecario</option>
+                        <option>Crédito Automotriz</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         
         <button class="btn btn-primary" id="btnGenerar" onclick="generarDatos()">
             <span class="btn-text">⚡ Generar Reporte</span>
@@ -117,30 +180,52 @@
         <div class="alert" id="alert"></div>
         
         <div class="result-card" id="resultCard">
-            <div class="result-title">📋 Resumen del Reporte</div>
             <div class="result-grid" id="resultGrid"></div>
             <button class="btn btn-pdf" id="btnPDF" onclick="generarPDF()">
                 <span class="btn-text">📥 Descargar PDF</span>
                 <span class="spinner"></span>
             </button>
+            <button class="btn btn-json" id="btnJSON" onclick="descargarJSON()">
+                <span class="btn-text">📄 Descargar JSON Completo</span>
+            </button>
         </div>
         
-        <p class="disclaimer">⚠️ Documento sintético sin validez oficial. Solo para testing.</p>
+        <p class="disclaimer">⚠️ Documento sintético sin validez oficial. Solo para testing y desarrollo.</p>
     </div>
 
     <script>
-        let reporteCompleto = null;  // Guarda el reporte completo
+        let reporteCompleto = null;
+
+        function obtenerDatosFormulario() {
+            const rango = document.getElementById('rangoScore').value;
+            let rangoScore = null;
+            if (rango) {
+                const [min, max] = rango.split('-').map(Number);
+                rangoScore = [min, max];
+            }
+            
+            return {
+                nombre: document.getElementById('nombre').value.trim(),
+                fecha_nacimiento: document.getElementById('fechaNac').value.trim(),
+                rfc: document.getElementById('rfc').value.trim(),
+                curp: document.getElementById('curp').value.trim(),
+                empleo: document.getElementById('empleo').value || undefined,
+                num_creditos: parseInt(document.getElementById('numCreditos').value) || undefined,
+                rango_score: rangoScore,
+                institucion: document.getElementById('institucion').value || undefined,
+                tipo_credito: document.getElementById('tipoCredito').value || undefined,
+                domicilio: {},
+            };
+        }
 
         async function generarDatos() {
-            const nombre = document.getElementById('nombre').value.trim();
-            const rfc = document.getElementById('rfc').value.trim();
-            const curp = document.getElementById('curp').value.trim();
+            const datos = obtenerDatosFormulario();
             const alertEl = document.getElementById('alert');
             const btnGenerar = document.getElementById('btnGenerar');
             const resultCard = document.getElementById('resultCard');
             const resultGrid = document.getElementById('resultGrid');
             
-            if (!nombre) {
+            if (!datos.nombre) {
                 alertEl.className = 'alert alert-error';
                 alertEl.textContent = 'Ingresa el nombre completo';
                 return;
@@ -150,35 +235,32 @@
             btnGenerar.disabled = true;
             alertEl.className = 'alert';
             resultCard.classList.remove('show');
-            reporteCompleto = null;
             
             try {
                 const resp = await fetch('/api/reporte', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({nombre, rfc, curp, domicilio: {}})
+                    body: JSON.stringify(datos)
                 });
                 const data = await resp.json();
                 
                 if (data.exito) {
-                    // GUARDAR EL REPORTE COMPLETO
                     reporteCompleto = data.reporte;
-                    
-                    // Mostrar resumen
                     const score = data.reporte.score;
                     const resumen = data.reporte.resumen;
+                    const consumidor = data.reporte.consumidor;
+                    
                     resultGrid.innerHTML = `
                         <div class="result-item"><div class="label">Score</div><div class="value">${score.puntaje} (${score.interpretacion})</div></div>
                         <div class="result-item"><div class="label">Créditos</div><div class="value">${resumen.total_creditos}</div></div>
                         <div class="result-item"><div class="label">Saldo Total</div><div class="value">$${resumen.total_saldo.toLocaleString()}</div></div>
                         <div class="result-item"><div class="label">Al Corriente</div><div class="value">${resumen.al_corriente}</div></div>
-                        <div class="result-item"><div class="label">Atrasados</div><div class="value">${resumen.atrasados}</div></div>
-                        <div class="result-item"><div class="label">Folio</div><div class="value">${data.reporte.encabezado.folio}</div></div>
+                        <div class="result-item"><div class="label">Domicilios</div><div class="value">${consumidor.domicilios.length}</div></div>
+                        <div class="result-item"><div class="label">Folio</div><div class="value">${data.reporte.encabezado.folio_formateado}</div></div>
                     `;
                     resultCard.classList.add('show');
-                    
                     alertEl.className = 'alert alert-success';
-                    alertEl.textContent = '✅ Reporte generado. Ahora descarga el PDF con los mismos datos.';
+                    alertEl.textContent = '✅ Reporte generado correctamente';
                 } else {
                     alertEl.className = 'alert alert-error';
                     alertEl.textContent = '❌ ' + data.error;
@@ -205,7 +287,6 @@
             btnPDF.disabled = true;
             
             try {
-                // ENVIAR EL REPORTE COMPLETO (no solo los datos personales)
                 const resp = await fetch('/api/reporte/pdf', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -225,7 +306,7 @@
                 URL.revokeObjectURL(url);
                 
                 alertEl.className = 'alert alert-success';
-                alertEl.textContent = '✅ PDF descargado con los mismos datos';
+                alertEl.textContent = '✅ PDF descargado';
             } catch(e) {
                 alertEl.className = 'alert alert-error';
                 alertEl.textContent = '❌ Error: ' + e.message;
@@ -234,6 +315,19 @@
                 btnPDF.disabled = false;
             }
         }
+
+        function descargarJSON() {
+            if (!reporteCompleto) return;
+            const blob = new Blob([JSON.stringify(reporteCompleto, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `reporte_buro_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
-</html>
+            </html>
