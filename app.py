@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file, Response
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from main import generar_reporte
 from plantilla import generar_pdf_reporte
@@ -10,7 +10,7 @@ CORS(app)
 
 @app.route('/')
 def index():
-    return send_file('index.html')
+    return app.send_static_file('index.html')
 
 @app.route('/api/reporte', methods=['POST'])
 def api_reporte():
@@ -20,18 +20,30 @@ def api_reporte():
             return jsonify({'error': 'JSON requerido'}), 400
         
         nombre = data.get('nombre', '')
-        rfc = data.get('rfc', '')
-        curp = data.get('curp', '')
-        domicilio = data.get('domicilio', {})
-        
         if not nombre:
             return jsonify({'error': 'Nombre requerido'}), 400
         
+        # Procesar personalización
+        rango_score = data.get('rango_score')
+        num_creditos = data.get('num_creditos')
+        institucion = data.get('institucion')
+        tipo_credito = data.get('tipo_credito')
+        fecha_nac = data.get('fecha_nacimiento', '')
+        rfc = data.get('rfc', '')
+        curp = data.get('curp', '')
+        empleo = data.get('empleo', '')
+        
         reporte = generar_reporte({
             'nombre': nombre,
+            'fecha_nacimiento': fecha_nac,
             'rfc': rfc,
             'curp': curp,
-            'domicilio': domicilio,
+            'empleo': empleo,
+            'num_creditos': num_creditos,
+            'rango_score': tuple(rango_score) if rango_score else None,
+            'institucion': institucion,
+            'tipo_credito': tipo_credito,
+            'domicilio': {},
         })
         
         return jsonify({'exito': True, 'reporte': reporte})
@@ -45,10 +57,14 @@ def api_reporte_pdf():
         if not data:
             return jsonify({'error': 'JSON requerido'}), 400
         
-        # Si viene un reporte completo, usarlo directamente
+        # CLAVE: Usar el reporte completo que envía el frontend
         reporte = data.get('reporte')
+        
         if not reporte:
-            # Si no, generar uno nuevo
+            # Fallback: si no viene reporte, generarlo desde los datos
+            nombre = data.get('nombre', '')
+            if not nombre:
+                return jsonify({'error': 'Reporte o nombre requerido'}), 400
             reporte = generar_reporte(data)
         
         pdf_bytes = generar_pdf_reporte(reporte)
