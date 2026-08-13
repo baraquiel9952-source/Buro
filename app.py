@@ -1,7 +1,8 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, Response
 from flask_cors import CORS
 from main import generar_reporte
 from plantilla import generar_pdf_reporte
+from datetime import datetime
 import io
 
 app = Flask(__name__)
@@ -44,17 +45,21 @@ def api_reporte_pdf():
         if not data:
             return jsonify({'error': 'JSON requerido'}), 400
         
+        # Generar reporte
         reporte = generar_reporte(data)
         pdf_bytes = generar_pdf_reporte(reporte)
         
-        return send_file(
-            io.BytesIO(pdf_bytes),
+        # Usar Response en lugar de send_file (más compatible con Vercel)
+        return Response(
+            pdf_bytes,
             mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f"reporte_buro_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            headers={
+                'Content-Disposition': f'attachment; filename=reporte_buro_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf'
+            }
         )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Para desarrollo local
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
