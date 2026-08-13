@@ -1,39 +1,3 @@
-import random
-import string
-import json
-from datetime import datetime, timedelta
-
-# ============================================================
-# CONFIGURACIÓN
-# ============================================================
-
-INSTITUCIONES = [
-    'BBVA México', 'Banorte', 'Santander', 'HSBC', 'Citibanamex',
-    'Scotiabank', 'BanCoppel', 'Banco Azteca', 'American Express',
-    'Liverpool', 'Coppel', 'Elektra', 'Nu México', 'Stori',
-    'RappiCard', 'Kueski', 'Creditea', 'Financiera Independencia',
-]
-
-TIPOS_CREDITO = [
-    'Tarjeta de Crédito', 'Préstamo Personal', 'Crédito Hipotecario',
-    'Crédito Automotriz', 'Préstamo de Nómina', 'Crédito de Tienda',
-    'Línea de Crédito', 'Financiamiento', 'Arrendamiento',
-]
-
-MESES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
-EMPLEOS = ['Empleado', 'Independiente', 'Empresario', 'Profesionista', 'Comerciante', 'Obrero', 'Técnico']
-
-# ============================================================
-# FUNCIONES AUXILIARES
-# ============================================================
-
-def generar_folio():
-    return ''.join(random.choices(string.digits, k=10))
-
-def formatear_fecha_buro(fecha):
-    meses = {'JANUARY':'ENE','FEBRUARY':'FEB','MARCH':'MAR','APRIL':'ABR',
-             'MAY':'MAY','JUNE':'JUN','JULY':'JUL','AUGUST':'AGO',
-             'SEPTEMBER':'SEP','OCTOBER':'OCT','NOVEMBER':'NOV','DECEMBER':'DIC'}
     for en, es in meses.items():
         fecha = fecha.replace(en, es)
     return fecha
