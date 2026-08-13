@@ -7,14 +7,17 @@
     <style>
         :root {
             --primary: #1a237e;
+            --primary-light: #534bae;
             --accent: #ff6f00;
             --success: #2e7d32;
             --error: #c62828;
+            --bg: #f5f5f5;
+            --card: #ffffff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #e8eaf6, #f5f5f5);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #e8eaf6 0%, #f5f5f5 50%, #fff3e0 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,34 +25,72 @@
             padding: 20px;
         }
         .container {
-            background: white;
+            background: var(--card);
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             padding: 30px;
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
         }
-        h1 { text-align: center; color: var(--primary); margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 20px; }
-        label { display: block; font-weight: 600; font-size: 12px; margin: 12px 0 4px; }
+        h1 { text-align: center; color: var(--primary); margin-bottom: 5px; font-size: 24px; }
+        .subtitle { text-align: center; color: #666; font-size: 13px; margin-bottom: 25px; }
+        
+        label { 
+            display: block; font-weight: 600; font-size: 12px; 
+            margin: 14px 0 5px; color: #333;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
         input {
-            width: 100%; padding: 10px; border: 2px solid #e0e0e0;
-            border-radius: 8px; font-size: 14px;
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0;
+            border-radius: 10px; font-size: 14px; transition: all 0.3s;
         }
-        input:focus { outline: none; border-color: var(--primary); }
-        button {
-            width: 100%; padding: 12px; margin-top: 20px;
-            background: var(--primary); color: white; border: none;
-            border-radius: 8px; font-size: 15px; font-weight: 600;
-            cursor: pointer;
+        input:focus { 
+            outline: none; border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(26,35,126,0.08);
         }
-        button:hover { background: #283593; }
+        
+        .btn {
+            width: 100%; padding: 14px; border: none; border-radius: 10px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.3s; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 15px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-light); transform: translateY(-1px); }
+        .btn-pdf { background: var(--accent); color: white; }
+        .btn-pdf:hover:not(:disabled) { background: #ff8f00; transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .btn .spinner {
+            display: none; width: 18px; height: 18px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .btn.loading .spinner { display: inline-block; }
+        .btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .alert {
-            padding: 12px; border-radius: 8px; margin-top: 15px;
-            display: none; font-size: 13px;
+            padding: 14px; border-radius: 10px; margin-top: 15px;
+            display: none; font-size: 13px; animation: fadeIn 0.3s;
         }
-        .alert-success { background: #e8f5e9; color: var(--success); display: block; }
-        .alert-error { background: #ffebee; color: var(--error); display: block; }
+        .alert-success { background: #e8f5e9; color: var(--success); display: block; border: 1px solid #c8e6c9; }
+        .alert-error { background: #ffebee; color: var(--error); display: block; border: 1px solid #ffcdd2; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .result-card {
+            display: none; background: #fafafa; border-radius: 10px;
+            padding: 15px; margin-top: 15px; border: 2px solid #e8eaf6;
+        }
+        .result-card.show { display: block; animation: fadeIn 0.5s; }
+        .result-title { font-weight: 700; color: var(--primary); font-size: 14px; margin-bottom: 10px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+        .result-item { padding: 8px; background: white; border-radius: 6px; }
+        .result-item .label { font-size: 9px; text-transform: uppercase; color: #888; }
+        .result-item .value { font-weight: 600; margin-top: 2px; }
+        
         .disclaimer {
             margin-top: 20px; padding: 12px; background: #fff3e0;
             border-radius: 8px; font-size: 11px; color: #e65100; text-align: center;
@@ -70,19 +111,37 @@
         <label>CURP (opcional):</label>
         <input type="text" id="curp" placeholder="XXXX000000XXXXXXXX" maxlength="18">
         
-        <button onclick="generar()">Generar Reporte</button>
+        <button class="btn btn-primary" id="btnGenerar" onclick="generarDatos()">
+            <span class="btn-text">⚡ Generar Datos</span>
+            <span class="spinner"></span>
+        </button>
         
         <div class="alert" id="alert"></div>
+        
+        <div class="result-card" id="resultCard">
+            <div class="result-title">📋 Resumen del Reporte</div>
+            <div class="result-grid" id="resultGrid"></div>
+            <button class="btn btn-pdf" id="btnPDF" onclick="generarPDF()">
+                <span class="btn-text">📥 Descargar PDF</span>
+                <span class="spinner"></span>
+            </button>
+        </div>
         
         <p class="disclaimer">⚠️ Documento sintético sin validez oficial. Solo para testing.</p>
     </div>
 
     <script>
-        async function generar() {
+        let ultimoReporte = null;
+        let ultimosDatos = null;
+
+        async function generarDatos() {
             const nombre = document.getElementById('nombre').value.trim();
             const rfc = document.getElementById('rfc').value.trim();
             const curp = document.getElementById('curp').value.trim();
             const alertEl = document.getElementById('alert');
+            const btnGenerar = document.getElementById('btnGenerar');
+            const resultCard = document.getElementById('resultCard');
+            const resultGrid = document.getElementById('resultGrid');
             
             if (!nombre) {
                 alertEl.className = 'alert alert-error';
@@ -90,16 +149,34 @@
                 return;
             }
             
+            ultimosDatos = { nombre, rfc, curp, domicilio: {} };
+            btnGenerar.classList.add('loading');
+            btnGenerar.disabled = true;
+            alertEl.className = 'alert';
+            resultCard.classList.remove('show');
+            
             try {
                 const resp = await fetch('/api/reporte', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({nombre, rfc, curp, domicilio: {}})
+                    body: JSON.stringify(ultimosDatos)
                 });
                 const data = await resp.json();
+                
                 if (data.exito) {
+                    ultimoReporte = data.reporte;
+                    
+                    // Mostrar resumen
+                    resultGrid.innerHTML = `
+                        <div class="result-item"><div class="label">Score</div><div class="value">${data.reporte.score.puntaje} (${data.reporte.score.interpretacion})</div></div>
+                        <div class="result-item"><div class="label">Créditos</div><div class="value">${data.reporte.resumen.total_creditos}</div></div>
+                        <div class="result-item"><div class="label">Saldo Total</div><div class="value">$${data.reporte.resumen.total_saldo.toLocaleString()}</div></div>
+                        <div class="result-item"><div class="label">Al Corriente</div><div class="value">${data.reporte.resumen.al_corriente}</div></div>
+                    `;
+                    resultCard.classList.add('show');
+                    
                     alertEl.className = 'alert alert-success';
-                    alertEl.textContent = `✅ Reporte generado. Score: ${data.reporte.score.puntaje} (${data.reporte.score.interpretacion}). ${data.reporte.resumen.total_creditos} créditos.`;
+                    alertEl.textContent = '✅ Reporte generado. Usa el botón para descargar PDF.';
                 } else {
                     alertEl.className = 'alert alert-error';
                     alertEl.textContent = '❌ ' + data.error;
@@ -107,6 +184,50 @@
             } catch(e) {
                 alertEl.className = 'alert alert-error';
                 alertEl.textContent = '❌ Error: ' + e.message;
+            } finally {
+                btnGenerar.classList.remove('loading');
+                btnGenerar.disabled = false;
+            }
+        }
+
+        async function generarPDF() {
+            if (!ultimosDatos) {
+                alertEl.className = 'alert alert-error';
+                alertEl.textContent = 'Primero genera los datos';
+                return;
+            }
+            
+            const btnPDF = document.getElementById('btnPDF');
+            btnPDF.classList.add('loading');
+            btnPDF.disabled = true;
+            
+            try {
+                const resp = await fetch('/api/reporte/pdf', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(ultimosDatos)
+                });
+                
+                if (!resp.ok) throw new Error('Error al generar PDF');
+                
+                const blob = await resp.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `reporte_buro_${Date.now()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alertEl.className = 'alert alert-success';
+                alertEl.textContent = '✅ PDF descargado correctamente';
+            } catch(e) {
+                alertEl.className = 'alert alert-error';
+                alertEl.textContent = '❌ Error: ' + e.message;
+            } finally {
+                btnPDF.classList.remove('loading');
+                btnPDF.disabled = false;
             }
         }
     </script>
